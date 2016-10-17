@@ -1,36 +1,35 @@
 %{?scl:%scl_package concurrentlinkedhashmap-lru}
 %{!?scl:%global pkg_name %{name}}
 
-Name:          %{?scl_prefix}concurrentlinkedhashmap-lru
-Version:       1.4.2
-Release:       4%{?dist}
-Summary:       A ConcurrentLinkedHashMap for Java
-License:       ASL 2.0
-Url:           https://github.com/ben-manes/concurrentlinkedhashmap
-Source0:       https://github.com/ben-manes/concurrentlinkedhashmap/archive/%{pkg_name}-%{version}.tar.gz
+Name:		%{?scl_prefix}concurrentlinkedhashmap-lru
+Version:	1.4.2
+Release:	5%{?dist}
+Summary:	A ConcurrentLinkedHashMap for Java
+License:	ASL 2.0
+Url:		https://github.com/ben-manes/concurrentlinkedhashmap
+Source0:	https://github.com/ben-manes/concurrentlinkedhashmap/archive/%{pkg_name}-%{version}.tar.gz
 
 # test deps
 %if 0
-BuildRequires: mvn(com.github.stephenc.high-scale-lib:high-scale-lib)
-BuildRequires: mvn(com.google.guava:guava)
-BuildRequires: mvn(commons-lang:commons-lang)
-BuildRequires: mvn(net.sf.ehcache:ehcache)
-BuildRequires: mvn(org.hamcrest:hamcrest-library) >= 1.3
-BuildRequires: mvn(org.mockito:mockito-all)
-BuildRequires: mvn(org.testng:testng)
+BuildRequires:	mvn(com.github.stephenc.high-scale-lib:high-scale-lib)
+BuildRequires:	mvn(com.google.guava:guava)
+BuildRequires:	mvn(commons-lang:commons-lang)
+BuildRequires:	mvn(net.sf.ehcache:ehcache)
+BuildRequires:	mvn(org.hamcrest:hamcrest-library) >= 1.3
+BuildRequires:	mvn(org.mockito:mockito-all)
+BuildRequires:	mvn(org.testng:testng)
 # unavailable test deps
-BuildRequires: mvn(com.google.caliper:caliper)
-BuildRequires: mvn(com.jayway.awaitility:awaitility)
+BuildRequires:	mvn(com.google.caliper:caliper)
+BuildRequires:	mvn(com.jayway.awaitility:awaitility)
 # require cache-benchmark == r7903 from http://sourceforge.net/projects/cachebenchfwk/
 BuildRequires: mvn(org.cachebench:cache-benchmark)
 %endif
 
-BuildRequires: %{?scl_mvn_prefix}maven-local
-BuildRequires: %{?scl_mvn_prefix}maven-enforcer-plugin
-BuildRequires: %{?scl_mvn_prefix}maven-plugin-bundle
-BuildRequires: %{?scl_mvn_prefix}maven-site-plugin
-BuildRequires: %{?scl_mvn_prefix}mvn(org.sonatype.oss:oss-parent:pom:)
-BuildRequires: %{?scl_mvn_prefix}mvn(com.google.code.findbugs:jsr305)
+BuildRequires: %{?scl_prefix_maven}maven-local
+BuildRequires: %{?scl_prefix_maven}maven-plugin-bundle
+BuildRequires: %{?scl_prefix_maven}maven-site-plugin
+BuildRequires: %{?scl_prefix_maven}mvn(org.sonatype.oss:oss-parent:pom:)
+BuildRequires: %{?scl_prefix_maven}mvn(com.google.code.findbugs:jsr305)
 %{?scl:Requires: %scl_runtime}
 
 BuildArch:     noarch
@@ -46,11 +45,11 @@ Summary:       Javadoc for %{name}
 This package contains javadoc for %{name}.
 
 %prep
-%{?scl_enable}
 %setup -q -n concurrentlinkedhashmap-%{pkg_name}-%{version}
 find . -name "*.class" -delete
 find . -name "*.jar" -type f -print -delete
 
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 # Unavailable
 %pom_remove_plugin :findbugs-maven-plugin
 %pom_remove_plugin :taglist-maven-plugin
@@ -82,18 +81,18 @@ sed -i "s|ConcurrentHashMapV8|java.util.concurrent.ConcurrentHashMap|" \
 %pom_remove_plugin :animal-sniffer-maven-plugin
 
 %mvn_file :%{pkg_name} %{pkg_name}
-%{?scl_disable}
+%{?scl:EOF}
 
 %build
-%{?scl_enable}
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 # test skipped for unavailable test deps
 %mvn_build -f
-%{?scl_disable}
+%{?scl:EOF}
 
 %install
-%{?scl_enable}
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 %mvn_install
-%{?scl_disable}
+%{?scl:EOF}
 
 %files -f .mfiles
 %doc README
@@ -103,6 +102,9 @@ sed -i "s|ConcurrentHashMapV8|java.util.concurrent.ConcurrentHashMap|" \
 %license LICENSE NOTICE
 
 %changelog
+* Mon Oct 17 2016 Tomas Repik <trepik@redhat.com> - 1.4.2-5
+- use standard SCL macros
+
 * Wed Jul 27 2016 Tomas Repik <trepik@redhat.com> - 1.4.2-4
 - scl conversion
 
